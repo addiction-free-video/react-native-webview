@@ -65,6 +65,7 @@ import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.common.build.ReactBuildConfig;
 import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
@@ -728,7 +729,9 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             mVideoView.setSystemUiVisibility(FULLSCREEN_SYSTEM_UI_VISIBILITY);
-            mReactContext.getCurrentActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            // mReactContext.getCurrentActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            mReactContext.getCurrentActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            mReactContext.getCurrentActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
           }
 
           mVideoView.setBackgroundColor(Color.BLACK);
@@ -753,6 +756,10 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
           }
 
           mReactContext.addLifecycleEventListener(this);
+
+          WritableMap eventData = Arguments.createMap();
+          reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                  .emit("WebViewPlayVideoFullScreenStart", eventData);
         }
 
         @Override
@@ -774,7 +781,10 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
           }
 
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mReactContext.getCurrentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            // mReactContext.getCurrentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            mReactContext.getCurrentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            mReactContext.getCurrentActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
           }
 
           rootView.removeView(mVideoView);
@@ -786,6 +796,10 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
           mReactContext.getCurrentActivity().setRequestedOrientation(initialRequestedOrientation);
 
           mReactContext.removeLifecycleEventListener(this);
+
+          WritableMap eventData = Arguments.createMap();
+          reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                  .emit("WebViewPlayVideoFullScreenEnd", eventData);
         }
       };
       webView.setWebChromeClient(mWebChromeClient);
@@ -1084,14 +1098,16 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
       LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, Gravity.CENTER);
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    protected static final int FULLSCREEN_SYSTEM_UI_VISIBILITY = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-      View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-      View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-      View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-      View.SYSTEM_UI_FLAG_FULLSCREEN |
-      View.SYSTEM_UI_FLAG_IMMERSIVE |
-      View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+    // protected static final int FULLSCREEN_SYSTEM_UI_VISIBILITY = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+    //   View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+    //   View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+    //   View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+    //   View.SYSTEM_UI_FLAG_FULLSCREEN |
+    //   View.SYSTEM_UI_FLAG_IMMERSIVE |
+    //   View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 
+    protected static final int FULLSCREEN_SYSTEM_UI_VISIBILITY = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE;
+    
     protected static final int COMMON_PERMISSION_REQUEST = 3;
 
     protected ReactContext mReactContext;
