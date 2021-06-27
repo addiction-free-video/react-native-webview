@@ -2,6 +2,7 @@ This fork made following changes:
 
 - Added fullscreen start and end events like discussed here: [Github issue](https://github.com/react-native-webview/react-native-webview/issues/586)
 - Navigation bar resizes fullscreen view when swiped in, this fixes following issue: [Github issue](https://github.com/react-native-webview/react-native-webview/issues/1444)
+
   /
   This fork is used by the [addiction free video app](https://addiction-free-video.github.io/)
   /
